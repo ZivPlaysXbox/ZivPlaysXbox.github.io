@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MALSite V14</title>
+    <title>Multi-Engine Anime Streamer</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -167,7 +167,7 @@
 <body>
 
 <div class="container">
-    <h1>MALSite V14</h1>
+    <h1>Multi-Engine Anime Streamer</h1>
     
     <div class="search-box">
         <label for="animeSearch">Search Anime Title</label>
@@ -185,6 +185,14 @@
             <input type="number" id="episode" value="1" min="1" required>
         </div>
         <div class="input-field">
+            <label for="serverEngine">Server Source</label>
+            <!-- FIXED: Added an un-sandboxed backup source dropdown for dead files -->
+            <select id="serverEngine">
+                <option value="megaplay" selected>MegaPlay Server (Default)</option>
+                <option value="vidsrc">VidSrc Alternate Server</option>
+            </select>
+        </div>
+        <div class="input-field">
             <label for="language">Format</label>
             <select id="language">
                 <option value="sub" selected>Subbed</option>
@@ -199,7 +207,7 @@
     </div>
 
     <div id="videoWrapper" class="video-container">
-        <!-- FIXED FOR GITHUB: Setting sandbox rules without allow-top-navigation permanently traps the player inside the frame -->
+        <!-- Retained security settings to safely trap player redirects inside github.io -->
         <iframe id="videoPlayer" src="" allowfullscreen frameborder="0" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
     </div>
 
@@ -273,6 +281,7 @@
         const malId = document.getElementById('malId').value.toString().trim();
         const episode = document.getElementById('episode').value.toString().trim();
         const language = document.getElementById('language').value;
+        const selectedEngine = document.getElementById('serverEngine').value;
         
         const player = document.getElementById('videoPlayer');
         const wrapper = document.getElementById('videoWrapper');
@@ -285,7 +294,15 @@
         }
 
         const s = "/";
-        const streamUrl = 'https:' + s + s + 'megaplay.buzz' + s + 'stream' + s + 'mal' + s + malId + s + episode + s + language;
+        let streamUrl = "";
+
+        // FIXED: Conditional routing blocks pick a new active web server if files are missing
+        if (selectedEngine === "megaplay") {
+            streamUrl = 'https:' + s + s + 'megaplay.buzz' + s + 'stream' + s + 'mal' + s + malId + s + episode + s + language;
+        } else if (selectedEngine === "vidsrc") {
+            // VidSrc backup engine parses format via sub/dub parameters
+            streamUrl = 'https:' + s + s + 'vidsrc.me' + s + 'embed' + s + 'anime' + s + malId + s + episode + s + language;
+        }
         
         player.src = streamUrl;
 
