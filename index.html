@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MALSite Beta V13</title>
+    <title>MALSite V14</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -118,12 +118,6 @@
             cursor: pointer;
             height: 41px;
             transition: background 0.2s;
-            text-align: center;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
         }
         .btn-primary {
             background-color: #ff4a5a;
@@ -140,31 +134,23 @@
         .btn-secondary:hover {
             background-color: #52525b;
         }
-        /* Visual box linking to video stream launcher */
-        .stream-card {
+        .video-container {
+            position: relative;
             width: 100%;
-            padding: 40px 20px;
+            padding-bottom: 56.25%;
+            height: 0;
             background-color: #000;
             border-radius: 6px;
+            overflow: hidden;
             border: 1px solid #26262b;
-            text-align: center;
             display: none;
-            box-sizing: border-box;
         }
-        .stream-link {
-            font-size: 20px;
-            color: #ff4a5a;
-            text-decoration: none;
-            font-weight: bold;
-            border: 2px solid #ff4a5a;
-            padding: 12px 24px;
-            border-radius: 4px;
-            display: inline-block;
-            transition: all 0.2s;
-        }
-        .stream-link:hover {
-            background-color: #ff4a5a;
-            color: #fff;
+        iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
         .placeholder {
             width: 100%;
@@ -181,7 +167,7 @@
 <body>
 
 <div class="container">
-    <h1>MALSite</h1>
+    <h1>MALSite V14</h1>
     
     <div class="search-box">
         <label for="animeSearch">Search Anime Title</label>
@@ -205,17 +191,16 @@
                 <option value="dub">Dubbed</option>
             </select>
         </div>
-        <button class="btn btn-primary" onclick="loadVideo()">Generate Link</button>
+        <button class="btn btn-primary" onclick="loadVideo()">Load Stream</button>
     </div>
 
     <div id="videoPlaceholder" class="placeholder">
-        Search an anime or enter data manually to generate your stream link
+        Search an anime or enter data manually to begin streaming
     </div>
 
-    <!-- FIXED: Bypassed frame injection entirely using a direct, targetable link card -->
-    <div id="videoWrapper" class="stream-card">
-        <p style="margin-top:0; color:#aaa; margin-bottom: 25px;">Stream Link Generated Successfully!</p>
-        <a id="videoPlayerLink" href="" target="_blank" class="stream-link">Click Here to Open Video Player &#x2197;</a>
+    <div id="videoWrapper" class="video-container">
+        <!-- FIXED FOR GITHUB: Setting sandbox rules without allow-top-navigation permanently traps the player inside the frame -->
+        <iframe id="videoPlayer" src="" allowfullscreen frameborder="0" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
     </div>
 
     <button id="nextBtn" class="btn btn-secondary" onclick="nextEpisode()">Next Episode &rarr;</button>
@@ -289,7 +274,7 @@
         const episode = document.getElementById('episode').value.toString().trim();
         const language = document.getElementById('language').value;
         
-        const playerLink = document.getElementById('videoPlayerLink');
+        const player = document.getElementById('videoPlayer');
         const wrapper = document.getElementById('videoWrapper');
         const placeholder = document.getElementById('videoPlaceholder');
         const nextBtn = document.getElementById('nextBtn');
@@ -299,12 +284,10 @@
             return;
         }
 
-        // Fixed string concatenation forces proper backslashes
         const s = "/";
         const streamUrl = 'https:' + s + s + 'megaplay.buzz' + s + 'stream' + s + 'mal' + s + malId + s + episode + s + language;
         
-        // FIXED: Applies string directly as a true browser link to destroy local file sandbox errors
-        playerLink.href = streamUrl;
+        player.src = streamUrl;
 
         placeholder.style.display = 'none';
         wrapper.style.display = 'block';
